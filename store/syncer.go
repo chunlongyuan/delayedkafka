@@ -138,7 +138,7 @@ func (p *syncer) doSync(ctx context.Context) error {
 
 	var total int
 	defer func() {
-		logrus.Warnln("do sync data count: %v", total)
+		logrus.Warnf("do sync data count: %v", total)
 	}()
 
 	syncMu.Lock()
