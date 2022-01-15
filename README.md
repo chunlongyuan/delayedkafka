@@ -27,3 +27,27 @@ mysql 事务保证消息投递成功
 多实例 HA/主备模式
 
 主备信息存储于 redis 中（TTL）,实例主动申请成为主节点 
+
+### 本机测试步骤 
+
+1. 启动本机测试环境 
+
+```shell
+make up
+```
+2. 创建测试表
+```shell
+go run main.go synctable
+```
+3. 启动核心服务
+```shell
+go run main.go start
+```
+4. 启动测试 consumer
+```shell
+go run example/consumer/main.go
+```
+5. 启动测试 producer
+```shell
+go run example/producer/main.go -delay 10s
+```
