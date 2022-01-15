@@ -1,24 +1,5 @@
 name: Go
 
-services:
-  - name: redis:6.2.3-buster
-    alias: redis
-    env:
-      ALLOW_EMPTY_PASSWORD: yes
-    ports:
-      - 6379
-  - mysql: mysql:5.7
-    alias: mysql
-    env:
-      MYSQL_RANDOM_ROOT_PASSWORD: yes
-      MYSQL_DATABASE: testdb
-      MYSQL_USER: test
-      MYSQL_PASSWORD: test123
-    ports:
-      - 3306
-    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci', '--skip-character-set-client-handshake', '--default-time-zone=+00:00']
-
-
 on:
   push:
     branches: [ main ]
