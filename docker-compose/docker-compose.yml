@@ -1,0 +1,42 @@
+version: "3"
+
+services:
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=testdb
+      - MYSQL_USER=test
+      - MYSQL_PASSWORD=test123
+    ports:
+      - 3306:3306
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci', '--skip-character-set-client-handshake', '--default-time-zone=+00:00']
+
+
+  redis:
+    image: redis:6.2.3-buster
+
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - 6379:6379
+
+
+
+  kafka:
+    image: solsson/kafka:1.1
+    entrypoint: ./bin/kafka-server-start.sh
+    command: ./bin/kafka-server-start.sh --override zookeeper.connect=zookeeper:2181 --override advertised.listeners=PLAINTEXT://${LOCALIP}:9092 --override broker.id=0 --override offsets.topic.replication.factor=1 --override delete.topic.enable=true --override log.retention.check.interval.ms=1000
+    restart: always
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+    links:
+      - zookeeper
+
+  zookeeper:
+    image: solsson/zookeeper:latest
+    ports:
+      - 2181:2181
