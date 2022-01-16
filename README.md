@@ -1,6 +1,6 @@
 # DelayedKafka
 
-A kafka and mysql backed priority queue for scheduling delayed events
+A kafka and mysql backed queue for scheduling delayed events
 
 ✅ 1. 消息支持延迟
 
@@ -12,7 +12,7 @@ mysql 事务保证消息投递成功
 
 ✅ 3. 可恢复
 
-主服务启动时在 redis 里加锁后同步 mysql 和 redis 里的数据保持一致, 同步期间支持接入新消息, 就算 redis 未曾故障也有可能有内容被驱逐, 因此也需要检查同步
+redis 重启后 master 负责同步 mysql 里的数据到 redis
 
 ✅ 4. 可撤回
 
@@ -24,9 +24,7 @@ mysql 事务保证消息投递成功
 
 ✅ 6. 高可用
 
-多实例 HA/主备模式
-
-主备信息存储于 redis 中（TTL）,实例主动申请成为主节点 
+多实例 HA/主备模式,  node 抢占 master
 
 ### 本机测试步骤 
 
