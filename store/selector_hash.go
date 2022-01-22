@@ -11,7 +11,6 @@ import (
 
 var defaultId = strconv.FormatUint(xid.Get(), 10)
 
-// NewSelector returns an initalised round robin selector
 func NewSelector(opts ...SelectorOption) Selector {
 	return new(hashSelector)
 }

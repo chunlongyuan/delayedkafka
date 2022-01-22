@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	// ErrNoneAvailable is returned by select when no routes were provided to select from
+	// ErrNoneAvailable is returned by select when no store were provided
 	ErrNoneAvailable = errors.New("none available")
 )
 
@@ -15,11 +15,11 @@ type SelectorOptions struct {
 
 type SelectorOption func(*SelectorOptions)
 
-// Selector selects a route from a pool
+// Selector selects a store
 type Selector interface {
-	// Select a route from the pool using the strategy
+	// Select a store using the strategy
 	Select([]Store, ...SelectorOption) (Next, error)
-	// Record the error returned from a route to inform future selection
+
 	Record(Store, error) error
 	// Reset the selector
 	Reset() error
@@ -27,5 +27,5 @@ type Selector interface {
 	String() string
 }
 
-// Next returns the next node
+// Next returns the next store
 type Next func() Store
