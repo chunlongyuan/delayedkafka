@@ -2,7 +2,6 @@ package locker
 
 import (
 	"context"
-	"errors"
 
 	"github.com/garyburd/redigo/redis"
 
@@ -29,24 +28,20 @@ func (p *redisLocker) Lock(ctx context.Context, key, value string, expire int) e
 	defer conn.Close()
 
 	script := `
-		if redis.call('EXISTS',KEYS[1])==0
-		then
-			redis.call('SETEX',KEYS[1],ARGV[2],ARGV[1])
-			return 1
-		end
-
-		if redis.call('GET',KEYS[1])==ARGV[1]
-		then
-			redis.call('EXPIRE',KEYS[1],ARGV[2])
-			return 1
-		end
-		return 0
+-- 不存在则直接 SETEX
+if redis.call('EXISTS',KEYS[1])==0
+then
+	redis.call('SETEX',KEYS[1],ARGV[2],ARGV[1])
+	return true
+end
+-- 存在则必须和 value 对应 且 EXPIRE 成功
+return redis.call('GET',KEYS[1])==ARGV[1] and redis.call('EXPIRE',KEYS[1],ARGV[2])==1
 `
-	code, err := redis.Int(conn.Do("EVAL", script, 1, key, value, expire))
+	ok, err := redis.Bool(conn.Do("EVAL", script, 1, key, value, expire))
 	if err != nil {
 		return err
 	}
-	if code != 1 {
+	if !ok {
 		return ErrLocked
 	}
 	return nil
@@ -58,19 +53,11 @@ func (p *redisLocker) UnLock(ctx context.Context, key, value string) error {
 	defer conn.Close()
 
 	script := `
-		if redis.call('GET',KEYS[1])==ARGV[1]
-		then 
-			return redis.call('DEL',KEYS[1])
-		else 
-			return 0
-		end
+if redis.call('GET',KEYS[1])==ARGV[1] 
+then
+	redis.call('DEL',KEYS[1])
+end
 `
-	code, err := redis.Int(conn.Do("EVAL", script, 1, key, value))
-	if err != nil {
-		return err
-	}
-	if code == 1 {
-		return nil
-	}
-	return errors.New("")
+	_, err := conn.Do("EVAL", script, 1, key, value)
+	return err
 }

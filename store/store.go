@@ -93,19 +93,15 @@ func (p *store) Add(ctx context.Context, topic string, id uint64, msg Message) e
 
 	idStr := strconv.FormatUint(id, 10)
 
-	// save data to redis hmap
-	_, err = conn.Do(`HSETNX`, p.getHashStoreKey(), idStr, string(infraMsgBytes))
-	if err != nil {
-		logger.WithError(err).WithField("key", p.getHashStoreKey()).Errorln(`hsetnx err`)
+	// save data to redis hmap and save id to redis zset
+	script := `
+redis.call('HSETNX', KEYS[1], ARGV[1], ARGV[2])
+redis.call('ZADD', KEYS[2], ARGV[3], ARGV[4])`
+	if _, err = conn.Do("EVAL", script, 2, p.getHashStoreKey(), p.getZSetStoreKey(), idStr, string(infraMsgBytes), infraMsg.TTRms, idStr); err != nil {
+		logger.WithError(err).Errorf("redis err by script: %v", script)
 		return err
 	}
-
-	// save id to redis zset
-	_, err = conn.Do(`ZADD`, p.getZSetStoreKey(), infraMsg.TTRms, idStr)
-	if err != nil {
-		logger.WithError(err).WithField("key", p.getZSetStoreKey()).Errorln(`zadd err`)
-		return err
-	}
+	logger.Infof("redis ok by script: %v", script)
 
 	return tx.Commit().Error
 }
@@ -135,17 +131,16 @@ func (p *store) Delete(ctx context.Context, topic string, id uint64) error {
 	}
 
 	idStr := strconv.FormatUint(id, 10)
-	// 删除 hmap
-	if _, err := conn.Do(`HDEL`, p.getHashStoreKey(), idStr); err != nil {
-		logger.WithError(err).Errorln("hdel err")
+	// 删除 hmap 和 zset
+	script := `
+redis.call('HDEL', KEYS[1], ARGV[1])
+redis.call('ZREM', KEYS[2], ARGV[2])
+`
+	if _, err := conn.Do("EVAL", script, 2, p.getHashStoreKey(), p.getZSetStoreKey(), idStr, idStr); err != nil {
+		logger.WithError(err).Errorf("redis err by script: %v", script)
 		return err
 	}
-
-	// 删除 zset
-	if _, err := conn.Do(`ZREM`, p.getZSetStoreKey(), idStr); err != nil {
-		logger.WithError(err).Errorln("zrem err")
-		return err
-	}
+	logger.Infof("redis ok by script: %v", script)
 
 	return tx.Commit().Error
 }
@@ -206,15 +201,17 @@ func (p *store) FetchDelayMessage(ctx context.Context, handle func(topic string,
 			logger.WithField("message", msg).Debugln("spent msg")
 		}
 
-		// remove from hmap
-		if _, err = conn.Do(`HDEL`, p.getHashStoreKey(), id); err != nil {
-			logger.WithError(err).Errorln("hdel err")
+		// remove from hmap and zset
+		script := `
+redis.call('HDEL', KEYS[1], ARGV[1])
+redis.call('ZREM', KEYS[2], ARGV[2])
+`
+		_, err := conn.Do("EVAL", script, 2, p.getHashStoreKey(), p.getZSetStoreKey(), id, id)
+		if err != nil {
+			logger.WithError(err).Errorf("redis err by script: %v", script)
+			return err
 		}
-
-		// remove from zset
-		if _, err = conn.Do(`ZREM`, p.getZSetStoreKey(), id); err != nil {
-			logger.WithError(err).Errorln("zrem err")
-		}
+		logger.Infof("redis ok by script: %v", script)
 
 		// update db status
 		if err := tx.Exec(`update `+TableMessage+` set status=? where id=?`, StatusSpent, msg.ID).Error; err != nil {
