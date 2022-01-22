@@ -52,7 +52,7 @@ go run example/consumer/main.go
 go run example/producer/main.go -delay 10s
 ```
 
-### Docker 运行
+### Docker 运行步骤
 
 1. 编译镜像
 ```shell
