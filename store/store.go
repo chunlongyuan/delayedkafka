@@ -14,6 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
+	"kdqueue/config"
 	"kdqueue/initial"
 	"kdqueue/share/sqlerr"
 )
@@ -245,9 +246,9 @@ redis.call('ZREM', KEYS[2], ARGV[2])
 }
 
 func (p *store) getHashStoreKey() string {
-	return fmt.Sprintf(`kdqueue/hash/%s`, p.key)
+	return fmt.Sprintf(`%s/hash/%s`, config.Cfg.QueueKeyword, p.key)
 }
 
 func (p *store) getZSetStoreKey() string {
-	return fmt.Sprintf(`kdqueue/zset/%s`, p.key)
+	return fmt.Sprintf(`%s/zset/%s`, config.Cfg.QueueKeyword, p.key)
 }

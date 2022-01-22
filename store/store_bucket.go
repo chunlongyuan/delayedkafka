@@ -11,10 +11,12 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const (
+	minWaitDuration = time.Second
+)
+
 var (
 	DefStore Store
-	//
-	minWaitDuration = time.Second
 )
 
 // 负责将数据放到不同的桶里

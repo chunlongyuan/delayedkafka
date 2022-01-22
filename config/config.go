@@ -17,4 +17,5 @@ type Config struct {
 	DBUsername     string   `env:"DB_USERNAME" envDefault:"test"`
 	DBPassword     string   `env:"DB_PASSWORD" envDefault:"test123"`
 	DBDatabase     string   `env:"DB_DATABASE"`
+	QueueKeyword   string   `env:"KDQueueKeyword" envDefault:"kdqueue"` // 涉及到缓存的关键字
 }

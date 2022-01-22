@@ -11,11 +11,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
+	"kdqueue/config"
 	"kdqueue/initial"
 )
 
 const (
-	monitorKDQueueKey   = "kdqueue/monitor/sync"
 	monitorKDQueueValue = 1
 )
 
@@ -24,6 +24,8 @@ var (
 	// SyncState 同步状态
 	syncMu    sync.Mutex
 	SyncState int
+	//
+	monitorKDQueueKey = fmt.Sprintf("%s/monitor/sync", config.Cfg.QueueKeyword)
 )
 
 // 负责同步 redis 和 mysql 的数据一致性
@@ -70,7 +72,7 @@ func (p *datadog) Sync(ctx context.Context) error {
 			return nil
 		default:
 		}
-		if p.monitor() {
+		if p.isNeedSync() {
 			logger.Warnln("some problems occurred so need sync data")
 			p.doSync(ctx) // 执行同步
 		}
@@ -79,9 +81,9 @@ func (p *datadog) Sync(ctx context.Context) error {
 	return nil
 }
 
-func (p *datadog) monitor() bool {
+func (p *datadog) isNeedSync() bool {
 
-	logger := logrus.WithField("function", "monitor")
+	logger := logrus.WithField("function", "isNeedSync")
 
 	conn := p.rc.Get()
 	defer conn.Close()
@@ -107,8 +109,8 @@ func (p *datadog) monitor() bool {
 
 func (p *datadog) resetMonitor(conn redis.Conn) {
 
-	logger := logrus.WithField("function", "reset monitor")
-	logger.Debugln("reset monitor")
+	logger := logrus.WithField("function", "resetMonitor")
+	logger.Debugln("reset")
 
 	_, err := conn.Do("SETEX", monitorKDQueueKey, p.monitorKDQueueSeconds, monitorKDQueueValue)
 	if err != nil {

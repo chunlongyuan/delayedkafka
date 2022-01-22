@@ -9,6 +9,7 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/smartystreets/goconvey/convey"
 
+	"kdqueue/config"
 	"kdqueue/initial"
 	"kdqueue/share/xid"
 	"kdqueue/xtesting"
@@ -40,8 +41,8 @@ func TestSyncer_monitor(t *testing.T) {
 			defer func() {
 				conn.Do("FLUSHALL")
 			}()
-			if got := s.monitor(); got != tt.want {
-				t.Errorf("monitor() = %v, want %v", got, tt.want)
+			if got := s.isNeedSync(); got != tt.want {
+				t.Errorf("isNeedSync() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -98,11 +99,11 @@ func TestSyncer_doSync(t *testing.T) {
 
 			So(s.doSync(ctx), ShouldBeNil)
 
-			n, err := redis.Int(conn.Do("ZCARD", "kdqueue/zset/default"))
+			n, err := redis.Int(conn.Do("ZCARD", config.Cfg.QueueKeyword+"/zset/default"))
 			So(err, ShouldBeNil)
 			So(n, ShouldEqual, 1)
 
-			n, err = redis.Int(conn.Do("HLEN", "kdqueue/hash/default"))
+			n, err = redis.Int(conn.Do("HLEN", config.Cfg.QueueKeyword+"/hash/default"))
 			So(err, ShouldBeNil)
 			So(n, ShouldEqual, 1)
 

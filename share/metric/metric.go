@@ -10,8 +10,8 @@ import (
 	"kdqueue/config"
 )
 
-const (
-	namespace = "kdqueue"
+var (
+	namespace = config.Cfg.QueueKeyword
 )
 
 func RunOnPort() {

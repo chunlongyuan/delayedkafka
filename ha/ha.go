@@ -6,22 +6,22 @@ package ha
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
 
+	"kdqueue/config"
 	"kdqueue/locker"
 	"kdqueue/share/xid"
 )
 
-const (
-	kdQueueHA = "kdqueue/ha"
-)
-
 var (
 	ErrNotMaster = errors.New("not master")
+	//
+	kdQueueHA = fmt.Sprintf("%s/ha", config.Cfg.QueueKeyword)
 )
 
 // HA 负责管理主备

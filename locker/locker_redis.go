@@ -28,20 +28,24 @@ func (p *redisLocker) Lock(ctx context.Context, key, value string, expire int) e
 	defer conn.Close()
 
 	script := `
--- 不存在则直接 SETEX
 if redis.call('EXISTS',KEYS[1])==0
 then
 	redis.call('SETEX',KEYS[1],ARGV[2],ARGV[1])
-	return true
+	return 1
 end
--- 存在则必须和 value 对应 且 EXPIRE 成功
-return redis.call('GET',KEYS[1])==ARGV[1] and redis.call('EXPIRE',KEYS[1],ARGV[2])==1
+
+if redis.call('GET',KEYS[1])==ARGV[1]
+then
+	redis.call('EXPIRE',KEYS[1],ARGV[2])
+	return 1
+end
+return 0
 `
-	ok, err := redis.Bool(conn.Do("EVAL", script, 1, key, value, expire))
+	code, err := redis.Int(conn.Do("EVAL", script, 1, key, value, expire))
 	if err != nil {
 		return err
 	}
-	if !ok {
+	if code != 1 {
 		return ErrLocked
 	}
 	return nil
