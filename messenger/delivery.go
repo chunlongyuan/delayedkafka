@@ -25,8 +25,11 @@ type Delivery interface {
 
 // KafkaMessage 定义投递的消息结构
 type KafkaMessage struct {
-	Message
-	Id string `json:"id"`
+	Id          string    `json:"id"`
+	DelaySecond int64     `json:"delay_second"`  // 延迟多少毫秒
+	CreatedAtMs int64     `json:"created_at_ms"` // 毫秒时间戳
+	Body        string    `json:"body"`          // 元数据
+	IssuedAt    time.Time `json:"issued_at"`
 }
 
 type kafkaDelivery struct {
@@ -47,6 +50,7 @@ func NewKafkaDelivery(opts ...Option) Delivery {
 
 // DoWork postman do his work
 func (p *kafkaDelivery) DoWork(ctx context.Context) error {
+
 	return p.store.FetchDelayMessage(ctx, func(topic string, id uint64, msg store.Message) error {
 		// deliver these message
 		return p.DeliverImmediately(topic, id, store.Message{
@@ -65,12 +69,11 @@ func (p *kafkaDelivery) DoWork(ctx context.Context) error {
 func (p *kafkaDelivery) DeliverImmediately(topic string, id uint64, msg store.Message) error {
 
 	postmanMessage := KafkaMessage{
-		Message: Message{
-			DelayMs:     msg.DelayMs,
-			Body:        msg.Body,
-			CreatedAtMs: msg.CreatedAtMs,
-		},
-		Id: strconv.FormatUint(id, 10),
+		Id:          strconv.FormatUint(id, 10),
+		DelaySecond: msg.DelayMs / 1e3,
+		Body:        msg.Body,
+		CreatedAtMs: msg.CreatedAtMs,
+		IssuedAt:    time.Now(),
 	}
 
 	body, err := json.Marshal(&postmanMessage)

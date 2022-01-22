@@ -25,7 +25,7 @@ func main() {
 	config.Version = V2_0_0_0 // specify appropriate version
 	config.Consumer.Return.Errors = true
 
-	group, err := NewConsumerGroup([]string{"localhost:9092"}, "my-group", config)
+	group, err := NewConsumerGroup([]string{"127.0.0.1:9092"}, "my-group", config)
 	if err != nil {
 		panic(err)
 	}

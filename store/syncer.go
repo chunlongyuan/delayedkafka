@@ -11,7 +11,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	"kdqueue/ha"
 	"kdqueue/initial"
 )
 
@@ -35,7 +34,6 @@ type Syncer interface {
 }
 
 type syncer struct {
-	ha                    ha.HA
 	store                 Store
 	db                    *gorm.DB
 	rc                    *redis.Pool
@@ -45,7 +43,6 @@ type syncer struct {
 
 func NewSyncer(opts ...SyncerOption) Syncer {
 	opt := SyncerOptions{
-		HA:                    ha.NewHA(),
 		Store:                 DefStore,
 		DB:                    initial.DefDB,
 		Redis:                 initial.DefRedisPool,
@@ -55,25 +52,12 @@ func NewSyncer(opts ...SyncerOption) Syncer {
 	for _, o := range opts {
 		o(&opt)
 	}
-	return &syncer{ha: opt.HA, store: opt.Store, db: opt.DB, rc: opt.Redis, monitorKDQueueSeconds: opt.MonitorKDQueueSeconds, monitorInterval: opt.MonitorInterval}
+	return &syncer{store: opt.Store, db: opt.DB, rc: opt.Redis, monitorKDQueueSeconds: opt.MonitorKDQueueSeconds, monitorInterval: opt.MonitorInterval}
 }
 
 func (p *syncer) Sync(ctx context.Context) error {
 
 	logger := logrus.WithContext(ctx)
-
-	// 主节点才处理同步
-	if err := p.ha.MushMaster(ctx); err != nil {
-		if errors.Is(err, ha.ErrNotMaster) {
-			logger.Infoln("slaver node")
-			// do nothing for slaver
-			return nil
-		}
-		logger.WithError(err).Errorln("must master err")
-		return err
-	}
-
-	logger.Infoln("i am master")
 
 	// 设置标记 TTL=2N 秒
 	// 每秒查看:
@@ -114,7 +98,7 @@ func (p *syncer) monitor() bool {
 		return true
 	}
 
-	if halfMonitorTime.After(time.Now()) { // 时间过半
+	if time.Now().After(halfMonitorTime) { // 时间过半
 		logger.Infoln("over half the time")
 		p.resetMonitor(conn)
 	}

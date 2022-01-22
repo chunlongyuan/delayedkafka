@@ -1,5 +1,6 @@
 
 LOCALIP=$(shell ./getip.sh)
+export LOCALIP
 
 .PHONY: test
 test:
@@ -9,7 +10,7 @@ test:
 docker:
 	docker build . -t kdqueue:latest
 
-docker_compose_files=-f docker-compose/docker-compose.yml
+docker_compose_files=-f ./docker-compose/docker-compose.yml
 
 up:
 	docker-compose $(docker_compose_files) up -d

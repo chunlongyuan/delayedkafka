@@ -44,10 +44,10 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	app := cli.NewApp()
-	app.Name = "kqueue"
+	app.Name = "kdqueue"
 	app.Usage = "A kafka and mysql backed priority queue for scheduling delayed events"
 	app.Commands = []*cli.Command{
-		cmd.KQueueCommand(),
+		cmd.QueueCommand(),
 		cmd.SyncTableForTest(),
 	}
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 	"time"
 
@@ -34,15 +35,20 @@ func TestPublishWithProducer(t *testing.T) {
 
 			id := xid.Get()
 
-			msg := PublishForm{}
-			msg.Topic = `this is topic`
-			msg.CreatedAtMs = time.Now().UnixNano() / 1e6
-			msg.DelayMs = 1000
-			msg.Body = `{"a":"b","c":10}`
+			form := PublishForm{}
+			form.Topic = `this is topic`
+			form.CreatedAtMs = strconv.FormatInt(time.Now().UnixNano()/1e6, 10)
+			form.DelaySecond = "2"
+			form.Body = struct {
+				Name string `json:"name"`
+			}{Name: `ppx`}
 
-			p.EXPECT().Publish(gomock.Any(), msg.Topic, msg.Message).Return(id, nil).Times(1)
+			msg, err := createMessage(form)
+			So(err, ShouldBeNil)
 
-			body, err := json.Marshal(&msg)
+			p.EXPECT().Publish(gomock.Any(), form.Topic, msg).Return(id, nil).Times(1)
+
+			body, err := json.Marshal(&form)
 			So(err, ShouldBeNil)
 
 			engine.POST("/messages", PublishWithProducer(p))
@@ -71,15 +77,20 @@ func TestPublishWithProducer(t *testing.T) {
 
 			id := xid.Get()
 
-			msg := PublishForm{}
-			msg.Topic = `this is topic`
-			msg.CreatedAtMs = time.Now().UnixNano() / 1e6
-			msg.DelayMs = 1000
-			msg.Body = `{"a":"b","c":10}`
+			form := PublishForm{}
+			form.Topic = `this is topic`
+			form.CreatedAtMs = strconv.FormatInt(time.Now().UnixNano()/1e6, 10)
+			form.DelaySecond = "2"
+			form.Body = struct {
+				Name string
+			}{Name: `ppx`}
 
-			p.EXPECT().Publish(gomock.Any(), msg.Topic, msg.Message).Return(id, errors.New(`mocked err`)).Times(1)
+			message, err := createMessage(form)
+			So(err, ShouldBeNil)
 
-			body, err := json.Marshal(&msg)
+			p.EXPECT().Publish(gomock.Any(), form.Topic, message).Return(id, errors.New(`mocked err`)).Times(1)
+
+			body, err := json.Marshal(&form)
 			So(err, ShouldBeNil)
 
 			engine.POST("/messages", PublishWithProducer(p))

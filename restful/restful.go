@@ -39,8 +39,13 @@ func Run(ctx context.Context) error {
 	// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
-	<-quit
-	logrus.Infoln("Shutdown Server ...")
+
+	select {
+	case <-ctx.Done():
+		logrus.Infoln("Context done, Shutdown Server ...")
+	case <-quit:
+		logrus.Infoln("Shutdown Server ...")
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
