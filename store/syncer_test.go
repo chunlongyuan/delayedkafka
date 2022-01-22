@@ -17,7 +17,7 @@ import (
 
 func TestSyncer_monitor(t *testing.T) {
 
-	s := NewSyncer(func(opt *SyncerOptions) { opt.MonitorKDQueueSeconds = 3 }).(*syncer)
+	s := NewDatadog(func(opt *SyncerOptions) { opt.MonitorKDQueueSeconds = 3 }).(*datadog)
 
 	conn := initial.DefRedisPool.Get()
 	defer conn.Close()
@@ -76,7 +76,7 @@ func TestSyncer_doSync(t *testing.T) {
 			conn.Do("FLUSHALL")
 		}()
 
-		s := NewSyncer(func(opt *SyncerOptions) { opt.MonitorKDQueueSeconds = 3; opt.Store = NewStore() }).(*syncer)
+		s := NewDatadog(func(opt *SyncerOptions) { opt.MonitorKDQueueSeconds = 3; opt.Store = NewStore() }).(*datadog)
 		Convey("sync should success", func() {
 
 			var messages []Message

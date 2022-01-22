@@ -45,7 +45,7 @@ func QueueCommand() *cli.Command {
 			errCh := make(chan error, 3)
 
 			go func() {
-				errCh <- store.NewSyncer().Sync(c)
+				errCh <- store.NewDatadog().Sync(c)
 			}()
 
 			go func() {

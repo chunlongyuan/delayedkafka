@@ -29,11 +29,11 @@ var (
 // 负责同步 redis 和 mysql 的数据一致性
 // 当redis丢失数据时执行该命令同步数据
 
-type Syncer interface {
+type Datadog interface {
 	Sync(context.Context) error
 }
 
-type syncer struct {
+type datadog struct {
 	store                 Store
 	db                    *gorm.DB
 	rc                    *redis.Pool
@@ -41,7 +41,7 @@ type syncer struct {
 	monitorInterval       time.Duration
 }
 
-func NewSyncer(opts ...SyncerOption) Syncer {
+func NewDatadog(opts ...SyncerOption) Datadog {
 	opt := SyncerOptions{
 		Store:                 DefStore,
 		DB:                    initial.DefDB,
@@ -52,10 +52,10 @@ func NewSyncer(opts ...SyncerOption) Syncer {
 	for _, o := range opts {
 		o(&opt)
 	}
-	return &syncer{store: opt.Store, db: opt.DB, rc: opt.Redis, monitorKDQueueSeconds: opt.MonitorKDQueueSeconds, monitorInterval: opt.MonitorInterval}
+	return &datadog{store: opt.Store, db: opt.DB, rc: opt.Redis, monitorKDQueueSeconds: opt.MonitorKDQueueSeconds, monitorInterval: opt.MonitorInterval}
 }
 
-func (p *syncer) Sync(ctx context.Context) error {
+func (p *datadog) Sync(ctx context.Context) error {
 
 	logger := logrus.WithContext(ctx)
 
@@ -79,7 +79,7 @@ func (p *syncer) Sync(ctx context.Context) error {
 	return nil
 }
 
-func (p *syncer) monitor() bool {
+func (p *datadog) monitor() bool {
 
 	logger := logrus.WithField("function", "monitor")
 
@@ -105,7 +105,7 @@ func (p *syncer) monitor() bool {
 	return false
 }
 
-func (p *syncer) resetMonitor(conn redis.Conn) {
+func (p *datadog) resetMonitor(conn redis.Conn) {
 
 	logger := logrus.WithField("function", "reset monitor")
 	logger.Debugln("reset monitor")
@@ -118,7 +118,7 @@ func (p *syncer) resetMonitor(conn redis.Conn) {
 	halfMonitorTime = time.Now().Add(time.Second * time.Duration(p.monitorKDQueueSeconds/2))
 }
 
-func (p *syncer) doSync(ctx context.Context) error {
+func (p *datadog) doSync(ctx context.Context) error {
 
 	var total int
 	defer func() {
