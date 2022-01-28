@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	_ "kdqueue/xtesting"
+	_ "dk/xtesting"
 )
 
 func TestHa(t *testing.T) {

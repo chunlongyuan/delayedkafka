@@ -5,7 +5,7 @@ import (
 
 	redigo "github.com/garyburd/redigo/redis"
 
-	"kdqueue/config"
+	"dk/config"
 )
 
 var (

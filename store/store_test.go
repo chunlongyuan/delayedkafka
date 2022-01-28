@@ -12,9 +12,9 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"gorm.io/gorm"
 
-	"kdqueue/initial"
-	"kdqueue/share/xid"
-	_ "kdqueue/xtesting"
+	"dk/initial"
+	"dk/share/xid"
+	_ "dk/xtesting"
 )
 
 func Test_store_AddAndDelete(t *testing.T) {

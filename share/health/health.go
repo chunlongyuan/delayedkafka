@@ -6,7 +6,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"kdqueue/config"
+	"dk/config"
 )
 
 func RunOnPort() {

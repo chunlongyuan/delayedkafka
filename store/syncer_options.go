@@ -12,7 +12,7 @@ type SyncerOptions struct {
 	DB    *gorm.DB
 	Redis *redis.Pool
 	//
-	MonitorKDQueueSeconds int
+	MonitordkSeconds int
 	//
 	MonitorInterval time.Duration
 }

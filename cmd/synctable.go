@@ -3,8 +3,8 @@ package cmd
 import (
 	"github.com/urfave/cli/v2"
 
-	"kdqueue/initial"
-	"kdqueue/store"
+	"dk/initial"
+	"dk/store"
 )
 
 func SyncTableForTest() *cli.Command {

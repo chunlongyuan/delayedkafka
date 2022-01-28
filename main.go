@@ -11,8 +11,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 
-	"kdqueue/cmd"
-	"kdqueue/config"
+	"dk/cmd"
+	"dk/config"
 )
 
 func init() {
@@ -44,7 +44,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	app := cli.NewApp()
-	app.Name = "kdqueue"
+	app.Name = "dk"
 	app.Usage = "A kafka and mysql backed priority queue for scheduling delayed events"
 	app.Commands = []*cli.Command{
 		cmd.QueueCommand(),

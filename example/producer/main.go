@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"kdqueue/restful"
+	"dk/restful"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 	flag.DurationVar(&delayDuration, "delay", time.Second*2, "delay duration")
 	flag.Parse()
 
-	url := `http://localhost:8000/kdqueue/v1/messages`
+	url := `http://localhost:8000/dk/v1/messages`
 	contentType := `application/json`
 
 	sentFunc := func() {

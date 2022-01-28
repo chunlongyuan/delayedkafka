@@ -11,12 +11,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	"kdqueue/config"
-	"kdqueue/initial"
+	"dk/config"
+	"dk/initial"
 )
 
 const (
-	monitorKDQueueValue = 1
+	monitordkValue = 1
 )
 
 var (
@@ -25,7 +25,7 @@ var (
 	syncMu    sync.Mutex
 	SyncState int
 	//
-	monitorKDQueueKey = fmt.Sprintf("%s/monitor/sync", config.Cfg.QueueKeyword)
+	monitordkKey = fmt.Sprintf("%s/monitor/sync", config.Cfg.QueueKeyword)
 )
 
 // 负责同步 redis 和 mysql 的数据一致性
@@ -36,25 +36,25 @@ type Datadog interface {
 }
 
 type datadog struct {
-	store                 Store
-	db                    *gorm.DB
-	rc                    *redis.Pool
-	monitorKDQueueSeconds int
-	monitorInterval       time.Duration
+	store            Store
+	db               *gorm.DB
+	rc               *redis.Pool
+	monitordkSeconds int
+	monitorInterval  time.Duration
 }
 
 func NewDatadog(opts ...SyncerOption) Datadog {
 	opt := SyncerOptions{
-		Store:                 DefStore,
-		DB:                    initial.DefDB,
-		Redis:                 initial.DefRedisPool,
-		MonitorKDQueueSeconds: 3600,            // one hour
-		MonitorInterval:       time.Second * 3, // 检查间隔
+		Store:            DefStore,
+		DB:               initial.DefDB,
+		Redis:            initial.DefRedisPool,
+		MonitordkSeconds: 3600,            // one hour
+		MonitorInterval:  time.Second * 3, // 检查间隔
 	}
 	for _, o := range opts {
 		o(&opt)
 	}
-	return &datadog{store: opt.Store, db: opt.DB, rc: opt.Redis, monitorKDQueueSeconds: opt.MonitorKDQueueSeconds, monitorInterval: opt.MonitorInterval}
+	return &datadog{store: opt.Store, db: opt.DB, rc: opt.Redis, monitordkSeconds: opt.MonitordkSeconds, monitorInterval: opt.MonitorInterval}
 }
 
 func (p *datadog) Sync(ctx context.Context) error {
@@ -88,7 +88,7 @@ func (p *datadog) isNeedSync() bool {
 	conn := p.rc.Get()
 	defer conn.Close()
 
-	n, err := redis.Int(conn.Do("GET", monitorKDQueueKey))
+	n, err := redis.Int(conn.Do("GET", monitordkKey))
 	if err != nil && !errors.Is(err, redis.ErrNil) {
 		logger.WithError(err).Errorln("get err")
 		return false
@@ -112,12 +112,12 @@ func (p *datadog) resetMonitor(conn redis.Conn) {
 	logger := logrus.WithField("function", "resetMonitor")
 	logger.Debugln("reset")
 
-	_, err := conn.Do("SETEX", monitorKDQueueKey, p.monitorKDQueueSeconds, monitorKDQueueValue)
+	_, err := conn.Do("SETEX", monitordkKey, p.monitordkSeconds, monitordkValue)
 	if err != nil {
 		logger.WithError(err).Errorln("setex err")
 		return
 	}
-	halfMonitorTime = time.Now().Add(time.Second * time.Duration(p.monitorKDQueueSeconds/2))
+	halfMonitorTime = time.Now().Add(time.Second * time.Duration(p.monitordkSeconds/2))
 }
 
 func (p *datadog) doSync(ctx context.Context) error {

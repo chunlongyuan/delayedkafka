@@ -3,7 +3,7 @@ package initial
 import (
 	"github.com/Shopify/sarama"
 
-	"kdqueue/config"
+	"dk/config"
 )
 
 var DefSyncProducer sarama.SyncProducer

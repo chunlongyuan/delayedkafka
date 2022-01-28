@@ -5,7 +5,7 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 
-	"kdqueue/initial"
+	"dk/initial"
 )
 
 type redisLocker struct {

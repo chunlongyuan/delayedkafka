@@ -11,7 +11,7 @@ RUN apk add -U tzdata \
 RUN apk add --update --no-cache curl
 RUN apk add bash build-base git
 RUN git config --system http.sslverify false
-RUN $COMPILER -o /go/bin/kdqueue .
+RUN $COMPILER -o /go/bin/dk .
 
 
 FROM alpine:3.11
@@ -20,4 +20,4 @@ RUN echo "http://mirrors.aliyun.com/alpine/v3.11/community" >> /etc/apk/reposito
 RUN apk add -U tzdata \
     && ln -sf /usr/share/zoneinfo/Asia/Shanghai  /etc/localtime
 RUN apk add --update --no-cache curl
-COPY --from=builder /go/bin/kdqueue .
+COPY --from=builder /go/bin/dk .

@@ -8,8 +8,8 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"github.com/stretchr/testify/assert"
 
-	"kdqueue/initial"
-	_ "kdqueue/xtesting"
+	"dk/initial"
+	_ "dk/xtesting"
 )
 
 func TestRedisLocker_Lock(t *testing.T) {

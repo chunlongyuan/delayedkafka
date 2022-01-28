@@ -18,8 +18,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 
-	"kdqueue/config"
-	"kdqueue/initial"
+	"dk/config"
+	"dk/initial"
 )
 
 func init() {

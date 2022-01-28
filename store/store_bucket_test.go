@@ -9,8 +9,8 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"gorm.io/gorm"
 
-	"kdqueue/initial"
-	_ "kdqueue/xtesting"
+	"dk/initial"
+	_ "dk/xtesting"
 )
 
 func TestBucketStore_Add(t *testing.T) {

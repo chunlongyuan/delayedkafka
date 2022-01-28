@@ -8,13 +8,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 
-	"kdqueue/ha"
-	"kdqueue/messenger"
-	"kdqueue/restful"
-	"kdqueue/share/health"
-	"kdqueue/share/metric"
-	"kdqueue/share/pprof"
-	"kdqueue/store"
+	"dk/ha"
+	"dk/messenger"
+	"dk/restful"
+	"dk/share/health"
+	"dk/share/metric"
+	"dk/share/pprof"
+	"dk/store"
 )
 
 func QueueCommand() *cli.Command {

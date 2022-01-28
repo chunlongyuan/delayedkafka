@@ -9,16 +9,16 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/smartystreets/goconvey/convey"
 
-	"kdqueue/config"
-	"kdqueue/initial"
-	"kdqueue/share/xid"
-	"kdqueue/xtesting"
-	_ "kdqueue/xtesting"
+	"dk/config"
+	"dk/initial"
+	"dk/share/xid"
+	"dk/xtesting"
+	_ "dk/xtesting"
 )
 
 func TestSyncer_monitor(t *testing.T) {
 
-	s := NewDatadog(func(opt *SyncerOptions) { opt.MonitorKDQueueSeconds = 3 }).(*datadog)
+	s := NewDatadog(func(opt *SyncerOptions) { opt.MonitordkSeconds = 3 }).(*datadog)
 
 	conn := initial.DefRedisPool.Get()
 	defer conn.Close()
@@ -77,7 +77,7 @@ func TestSyncer_doSync(t *testing.T) {
 			conn.Do("FLUSHALL")
 		}()
 
-		s := NewDatadog(func(opt *SyncerOptions) { opt.MonitorKDQueueSeconds = 3; opt.Store = NewStore() }).(*datadog)
+		s := NewDatadog(func(opt *SyncerOptions) { opt.MonitordkSeconds = 3; opt.Store = NewStore() }).(*datadog)
 		Convey("sync should success", func() {
 
 			var messages []Message

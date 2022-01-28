@@ -13,15 +13,15 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"kdqueue/config"
-	"kdqueue/locker"
-	"kdqueue/share/xid"
+	"dk/config"
+	"dk/locker"
+	"dk/share/xid"
 )
 
 var (
 	ErrNotMaster = errors.New("not master")
 	//
-	kdQueueHA = fmt.Sprintf("%s/ha", config.Cfg.QueueKeyword)
+	dkHA = fmt.Sprintf("%s/ha", config.Cfg.QueueKeyword)
 )
 
 // HA 负责管理主备
@@ -49,7 +49,7 @@ func NewHA(opts ...Option) HA {
 
 func (p *ha) MushMaster(ctx context.Context) error {
 	// 争抢 master, 争抢到之后通过心跳将其长期持有
-	err := p.locker.Lock(ctx, kdQueueHA, p.nodeId, 5)
+	err := p.locker.Lock(ctx, dkHA, p.nodeId, 5)
 	if errors.Is(err, locker.ErrLocked) { // 被别人抢了 master
 		return ErrNotMaster
 	}
@@ -69,7 +69,7 @@ func (p *ha) retainLock(ctx context.Context) {
 			return
 		case <-time.After(time.Second * 4): //
 		}
-		if err := p.locker.Lock(ctx, kdQueueHA, p.nodeId, 5); err != nil {
+		if err := p.locker.Lock(ctx, dkHA, p.nodeId, 5); err != nil {
 			logrus.WithError(err).Errorln("lock err")
 		}
 	}

@@ -9,8 +9,8 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/sirupsen/logrus"
 
-	"kdqueue/initial"
-	"kdqueue/store"
+	"dk/initial"
+	"dk/store"
 )
 
 var (

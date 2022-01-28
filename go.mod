@@ -1,4 +1,4 @@
-module kdqueue
+module dk
 
 go 1.14
 

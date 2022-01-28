@@ -8,9 +8,9 @@ import (
 	"errors"
 	"time"
 
-	"kdqueue/ha"
-	"kdqueue/share/xid"
-	"kdqueue/store"
+	"dk/ha"
+	"dk/share/xid"
+	"dk/store"
 )
 
 var (

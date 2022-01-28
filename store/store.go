@@ -14,9 +14,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
-	"kdqueue/config"
-	"kdqueue/initial"
-	"kdqueue/share/sqlerr"
+	"dk/config"
+	"dk/initial"
+	"dk/share/sqlerr"
 )
 
 // 负责存储

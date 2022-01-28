@@ -11,8 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
-	"kdqueue/config"
-	"kdqueue/messenger"
+	"dk/config"
+	"dk/messenger"
 )
 
 func Run(ctx context.Context) error {
@@ -23,7 +23,7 @@ func Run(ctx context.Context) error {
 
 	engine := gin.Default()
 
-	v1 := engine.Group("kdqueue/v1")
+	v1 := engine.Group("dk/v1")
 	{
 		v1.POST("/messages", PublishWithProducer(producer))  // 投递消息
 		v1.DELETE("/messages", CancelWithProducer(producer)) // 删除消息

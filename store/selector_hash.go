@@ -6,7 +6,7 @@ import (
 	"hash/crc32"
 	"strconv"
 
-	"kdqueue/share/xid"
+	"dk/share/xid"
 )
 
 var defaultId = strconv.FormatUint(xid.Get(), 10)

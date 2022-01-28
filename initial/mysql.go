@@ -6,8 +6,8 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
-	"kdqueue/config"
-	"kdqueue/share/xassert"
+	"dk/config"
+	"dk/share/xassert"
 )
 
 var (

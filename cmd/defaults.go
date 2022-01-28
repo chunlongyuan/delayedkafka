@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"kdqueue/initial"
-	"kdqueue/messenger"
-	"kdqueue/store"
+	"dk/initial"
+	"dk/messenger"
+	"dk/store"
 )
 
 func setDefaults() {

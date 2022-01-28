@@ -1,7 +1,7 @@
 package messenger
 
 import (
-	"kdqueue/store"
+	"dk/store"
 )
 
 type ProducerOptions struct {

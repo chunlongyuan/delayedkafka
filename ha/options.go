@@ -1,6 +1,6 @@
 package ha
 
-import "kdqueue/locker"
+import "dk/locker"
 
 type Options struct {
 	Locker locker.Locker

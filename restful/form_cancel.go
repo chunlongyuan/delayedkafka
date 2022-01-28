@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"kdqueue/messenger"
+	"dk/messenger"
 )
 
 func CancelWithProducer(p messenger.Producer) gin.HandlerFunc {

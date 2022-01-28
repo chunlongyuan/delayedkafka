@@ -11,9 +11,9 @@ import (
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
 
-	"kdqueue/messenger"
-	"kdqueue/share/xid"
-	_ "kdqueue/xtesting"
+	"dk/messenger"
+	"dk/share/xid"
+	_ "dk/xtesting"
 )
 
 func TestCancelWithProducer(t *testing.T) {

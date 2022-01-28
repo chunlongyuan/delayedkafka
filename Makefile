@@ -8,7 +8,7 @@ test:
 
 .PHONY: docker
 docker:
-	docker build . -t kdqueue:latest
+	docker build . -t dk:latest
 
 docker_compose_files=-f ./docker-compose/docker-compose.yml
 
