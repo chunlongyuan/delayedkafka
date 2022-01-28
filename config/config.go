@@ -19,4 +19,5 @@ type Config struct {
 	DBDatabase     string   `env:"DB_DATABASE"`
 	BucketCount    int      `env:"BUCKET_COUNT" envDefault:"1"`                 // 存储分桶数
 	QueueKeyword   string   `env:"DELAY_KAFKA_KEYWORD" envDefault:"delaykafka"` // 涉及到缓存的关键字
+	NodeId         string   `env:"DELAY_KAFKA_NODE_ID"`                         // node id, 默认取 private ip
 }

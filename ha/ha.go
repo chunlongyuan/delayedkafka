@@ -41,11 +41,7 @@ func NewHA(opts ...Option) HA {
 
 	dkHA = fmt.Sprintf("%s/ha", config.Cfg.QueueKeyword)
 
-	nodeId := ip.PrivateIPv4()
-	if len(nodeId) == 0 {
-		nodeId = strconv.Itoa(int(xid.Get() % 1000))
-	}
-
+	nodeId := genNodeId()
 	fmt.Printf("ha: nodeId:%v\n", nodeId)
 
 	opt := Options{Locker: locker.NewRedisLocker(), NodeId: nodeId}
@@ -55,6 +51,17 @@ func NewHA(opts ...Option) HA {
 	}
 
 	return &ha{locker: opt.Locker, nodeId: opt.NodeId}
+}
+
+func genNodeId() string {
+	if len(config.Cfg.NodeId) > 0 {
+		return config.Cfg.NodeId
+	}
+	privateIp := ip.PrivateIPv4()
+	if len(privateIp) > 0 {
+		return privateIp
+	}
+	return strconv.Itoa(int(xid.Get() % 1000))
 }
 
 func (p *ha) MushMaster(ctx context.Context) error {
