@@ -17,5 +17,6 @@ type Config struct {
 	DBUsername     string   `env:"DB_USERNAME" envDefault:"test"`
 	DBPassword     string   `env:"DB_PASSWORD" envDefault:"test123"`
 	DBDatabase     string   `env:"DB_DATABASE"`
-	QueueKeyword   string   `env:"DELAY_KAFKA_KEYWORD" envDefault:"dk"` // 涉及到缓存的关键字
+	BucketCount    int      `env:"BUCKET_COUNT" envDefault:"1"`                 // 存储分桶数
+	QueueKeyword   string   `env:"DELAY_KAFKA_KEYWORD" envDefault:"delaykafak"` // 涉及到缓存的关键字
 }
