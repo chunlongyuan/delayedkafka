@@ -76,3 +76,12 @@ curl --location --request POST 'localhost:8000/dk/v1/messages' \
 	"body": "{\"a\":\"b\",\"c\":10}"
 }'
 ```
+
+4. redis data with `delaykafka` DELAY_KAFKA_KEYWORD
+```shell
+127.0.0.1:6379> keys *
+1) "delaykafka/zset/01"
+2) "delaykafka/ha"
+3) "delaykafka/hash/01"
+4) "delaykafka/monitor/sync"
+```

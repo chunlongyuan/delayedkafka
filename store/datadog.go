@@ -81,7 +81,6 @@ func (p *datadog) Sync(ctx context.Context) error {
 		}
 		<-time.After(p.monitorInterval)
 	}
-	return nil
 }
 
 func (p *datadog) isNeedSync() bool {

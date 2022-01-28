@@ -53,7 +53,7 @@ func NewStore(opts ...Option) Store {
 
 func (p *store) Add(ctx context.Context, topic string, id uint64, msg Message) error {
 
-	logger := logrus.WithField("topic", topic).WithField("id", id).WithField("msg", msg)
+	logger := logrus.WithField("key", p.key).WithField("topic", topic).WithField("id", id).WithField("msg", msg)
 
 	logger.Infoln("add message")
 
@@ -97,19 +97,23 @@ func (p *store) Add(ctx context.Context, topic string, id uint64, msg Message) e
 	// save data to redis hmap and save id to redis zset
 	script := `
 redis.call('HSETNX', KEYS[1], ARGV[1], ARGV[2])
-redis.call('ZADD', KEYS[2], ARGV[3], ARGV[4])`
+redis.call('ZADD', KEYS[2], ARGV[3], ARGV[4])
+`
+
+	logger = logger.WithField("script", script)
+
 	if _, err = conn.Do("EVAL", script, 2, p.getHashStoreKey(), p.getZSetStoreKey(), idStr, string(infraMsgBytes), infraMsg.TTRms, idStr); err != nil {
-		logger.WithError(err).Errorf("redis err by script: %v", script)
+		logger.WithError(err).Errorln("redis eval err")
 		return err
 	}
-	logger.Infof("redis ok by script: %v", script)
+	logger.Infoln("redis eval ok")
 
 	return tx.Commit().Error
 }
 
 func (p *store) Delete(ctx context.Context, topic string, id uint64) error {
 
-	logger := logrus.WithField("topic", topic).WithField("id", id)
+	logger := logrus.WithField("key", p.key).WithField("topic", topic).WithField("id", id)
 
 	logger.Infoln("delete message")
 
@@ -137,18 +141,20 @@ func (p *store) Delete(ctx context.Context, topic string, id uint64) error {
 redis.call('HDEL', KEYS[1], ARGV[1])
 redis.call('ZREM', KEYS[2], ARGV[2])
 `
+	logger = logger.WithField("script", script)
+
 	if _, err := conn.Do("EVAL", script, 2, p.getHashStoreKey(), p.getZSetStoreKey(), idStr, idStr); err != nil {
-		logger.WithError(err).Errorf("redis err by script: %v", script)
+		logger.WithError(err).Errorln("redis eval err")
 		return err
 	}
-	logger.Infof("redis ok by script: %v", script)
+	logger.Infoln("redis eval ok")
 
 	return tx.Commit().Error
 }
 
 func (p *store) FetchDelayMessage(ctx context.Context, handle func(topic string, id uint64, msg Message) error) error {
 
-	logger := logrus.WithContext(ctx)
+	logger := logrus.WithField("key", p.key)
 
 	conn := p.rPool.Get()
 	defer conn.Close()
@@ -192,10 +198,10 @@ func (p *store) FetchDelayMessage(ctx context.Context, handle func(topic string,
 		}()
 
 		var msg Message
-		if err := json.Unmarshal([]byte(infraMessage), &msg); err != nil {
+		if err = json.Unmarshal([]byte(infraMessage), &msg); err != nil {
 			logger.WithError(err).Errorln("unmarshal err")
 		} else { // 解析成功才抛上去
-			if err := handle(msg.Topic, msg.ID, Message{DelayMs: msg.DelayMs, Body: msg.Body, CreatedAtMs: msg.CreatedAtMs}); err != nil {
+			if err = handle(msg.Topic, msg.ID, Message{DelayMs: msg.DelayMs, Body: msg.Body, CreatedAtMs: msg.CreatedAtMs}); err != nil {
 				logger.WithError(err).WithField("msg", msg).Errorln("handle msg err")
 				return err // 只有 handle 错误才认为出错, 并且该错误不能将消息消费掉
 			}
@@ -207,16 +213,18 @@ func (p *store) FetchDelayMessage(ctx context.Context, handle func(topic string,
 redis.call('HDEL', KEYS[1], ARGV[1])
 redis.call('ZREM', KEYS[2], ARGV[2])
 `
-		_, err := conn.Do("EVAL", script, 2, p.getHashStoreKey(), p.getZSetStoreKey(), id, id)
+
+		logger = logger.WithField("script", script)
+		_, err = conn.Do("EVAL", script, 2, p.getHashStoreKey(), p.getZSetStoreKey(), id, id)
 		if err != nil {
-			logger.WithError(err).Errorf("redis err by script: %v", script)
+			logger.WithError(err).Errorln("redis err")
 			return err
 		}
-		logger.Infof("redis ok by script: %v", script)
+		logger.Infoln("redis eval ok")
 
 		// update db state
 		if err := tx.Exec(`update `+TableMessage+` set state=? where id=?`, StatusSpent, msg.ID).Error; err != nil {
-			logger.WithError(err).Errorln(" update db err")
+			logger.WithError(err).Errorln("update db err")
 		}
 
 		return tx.Commit().Error
@@ -233,7 +241,8 @@ redis.call('ZREM', KEYS[2], ARGV[2])
 		validCount++
 
 		// 逐条处理
-		if err := handleBodyFun(ids[i], infraMessage); err != nil {
+		if err = handleBodyFun(ids[i], infraMessage); err != nil {
+			logger.WithError(err).Errorln("exec handle body func err")
 			return err
 		}
 	}

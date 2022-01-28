@@ -76,9 +76,11 @@ func (p *kafkaDelivery) DeliverImmediately(topic string, id uint64, msg store.Me
 		IssuedAt:    time.Now(),
 	}
 
+	logger := logrus.WithField("postman_message", postmanMessage)
+
 	body, err := json.Marshal(&postmanMessage)
 	if err != nil {
-		logrus.WithError(err).WithField("postman_message", postmanMessage).Errorln("marshal err")
+		logger.Errorln("marshal err")
 		return err
 	}
 
@@ -86,6 +88,9 @@ func (p *kafkaDelivery) DeliverImmediately(topic string, id uint64, msg store.Me
 		Topic: topic,
 		Value: sarama.ByteEncoder(body),
 	})
+	if err != nil {
+		logger.WithError(err).Errorln("send message err")
+	}
 	return err
 }
 

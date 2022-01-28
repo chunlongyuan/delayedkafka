@@ -43,7 +43,7 @@ func NewBucketStore(opts ...BucketStoreOption) Store {
 
 	newStoreFun := func(i int) {
 		bs.stores = append(bs.stores, NewStore(func(opt *Options) {
-			opt.Key = fmt.Sprintf(`store-%02d`, i)
+			opt.Key = fmt.Sprintf(`%02d`, i)
 		}))
 	}
 
