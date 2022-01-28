@@ -6,6 +6,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"dk/share/ip"
 )
 
 /** 协议说明
@@ -58,7 +60,7 @@ type idStruct struct {
 
 func init() {
 
-	privateIP := privateIPToMachineID()
+	privateIP := ip.PrivateIPToMachineID()
 	defKey = uint64(privateIP & maxKey)          // 屏蔽高位
 	machineId = uint64(privateIP & maxMachineId) // 屏蔽高位
 

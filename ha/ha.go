@@ -15,13 +15,14 @@ import (
 
 	"dk/config"
 	"dk/locker"
+	"dk/share/ip"
 	"dk/share/xid"
 )
 
 var (
 	ErrNotMaster = errors.New("not master")
 	//
-	dkHA = fmt.Sprintf("%s/ha", config.Cfg.QueueKeyword)
+	dkHA string
 )
 
 // HA 负责管理主备
@@ -38,7 +39,16 @@ type ha struct {
 
 func NewHA(opts ...Option) HA {
 
-	opt := Options{Locker: locker.NewRedisLocker(), NodeId: strconv.Itoa(int(xid.Get() % 1000))}
+	dkHA = fmt.Sprintf("%s/ha", config.Cfg.QueueKeyword)
+
+	nodeId := ip.PrivateIPv4()
+	if len(nodeId) == 0 {
+		nodeId = strconv.Itoa(int(xid.Get() % 1000))
+	}
+
+	fmt.Printf("ha: nodeId:%v\n", nodeId)
+
+	opt := Options{Locker: locker.NewRedisLocker(), NodeId: nodeId}
 
 	for _, o := range opts {
 		o(&opt)

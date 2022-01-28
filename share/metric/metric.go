@@ -10,10 +10,6 @@ import (
 	"dk/config"
 )
 
-var (
-	namespace = config.Cfg.QueueKeyword
-)
-
 func RunOnPort() {
 	go func() {
 		addr := net.JoinHostPort("", config.Cfg.PrometheusPort)

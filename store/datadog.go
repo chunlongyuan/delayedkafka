@@ -25,7 +25,7 @@ var (
 	syncMu    sync.Mutex
 	SyncState int
 	//
-	monitordkKey = fmt.Sprintf("%s/monitor/sync", config.Cfg.QueueKeyword)
+	monitorDKKey string
 )
 
 // 负责同步 redis 和 mysql 的数据一致性
@@ -39,11 +39,14 @@ type datadog struct {
 	store            Store
 	db               *gorm.DB
 	rc               *redis.Pool
-	monitordkSeconds int
+	monitorDKSeconds int
 	monitorInterval  time.Duration
 }
 
 func NewDatadog(opts ...SyncerOption) Datadog {
+
+	monitorDKKey = fmt.Sprintf("%s/monitor/sync", config.Cfg.QueueKeyword)
+
 	opt := SyncerOptions{
 		Store:            DefStore,
 		DB:               initial.DefDB,
@@ -54,7 +57,7 @@ func NewDatadog(opts ...SyncerOption) Datadog {
 	for _, o := range opts {
 		o(&opt)
 	}
-	return &datadog{store: opt.Store, db: opt.DB, rc: opt.Redis, monitordkSeconds: opt.MonitordkSeconds, monitorInterval: opt.MonitorInterval}
+	return &datadog{store: opt.Store, db: opt.DB, rc: opt.Redis, monitorDKSeconds: opt.MonitordkSeconds, monitorInterval: opt.MonitorInterval}
 }
 
 func (p *datadog) Sync(ctx context.Context) error {
@@ -88,7 +91,7 @@ func (p *datadog) isNeedSync() bool {
 	conn := p.rc.Get()
 	defer conn.Close()
 
-	n, err := redis.Int(conn.Do("GET", monitordkKey))
+	n, err := redis.Int(conn.Do("GET", monitorDKKey))
 	if err != nil && !errors.Is(err, redis.ErrNil) {
 		logger.WithError(err).Errorln("get err")
 		return false
@@ -112,12 +115,12 @@ func (p *datadog) resetMonitor(conn redis.Conn) {
 	logger := logrus.WithField("function", "resetMonitor")
 	logger.Debugln("reset")
 
-	_, err := conn.Do("SETEX", monitordkKey, p.monitordkSeconds, monitordkValue)
+	_, err := conn.Do("SETEX", monitorDKKey, p.monitorDKSeconds, monitordkValue)
 	if err != nil {
 		logger.WithError(err).Errorln("setex err")
 		return
 	}
-	halfMonitorTime = time.Now().Add(time.Second * time.Duration(p.monitordkSeconds/2))
+	halfMonitorTime = time.Now().Add(time.Second * time.Duration(p.monitorDKSeconds/2))
 }
 
 func (p *datadog) doSync(ctx context.Context) error {

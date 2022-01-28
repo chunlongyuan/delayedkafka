@@ -37,6 +37,8 @@ func init() {
 	} else {
 		log.SetLevel(log.InfoLevel)
 	}
+
+	log.Infof("got config:%#v", config.Cfg)
 }
 
 func main() {

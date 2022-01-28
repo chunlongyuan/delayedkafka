@@ -1,14 +1,21 @@
-package xid
+package ip
 
 import (
 	"errors"
-	"fmt"
 	"net"
 )
 
+func PrivateIPv4() string {
+	ip, err := privateIPv4()
+	if err != nil {
+		return ""
+	}
+	return ip.String()
+}
+
 // PrivateIPToMachineID convert private ip to machine id.
 // From https://github.com/sony/sonyflake/blob/master/sonyflake.go
-func privateIPToMachineID() uint16 {
+func PrivateIPToMachineID() uint16 {
 	ip, err := lower16BitPrivateIP()
 	if err != nil {
 		return 0
@@ -51,9 +58,6 @@ func lower16BitPrivateIP() (uint16, error) {
 	ip, err := privateIPv4()
 	if err != nil {
 		return 0, err
-	}
-	if xidDebug {
-		fmt.Printf("ip=%s\n", ip.String())
 	}
 
 	// Snowflake macnineID max length is 10, max value is 1023
