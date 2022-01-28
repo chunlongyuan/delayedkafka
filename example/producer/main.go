@@ -15,8 +15,12 @@ import (
 
 func main() {
 
-	var delayDuration time.Duration
-	flag.DurationVar(&delayDuration, "delay", time.Second*2, "delay duration")
+	var (
+		count         int
+		delayDuration time.Duration
+	)
+	flag.IntVar(&count, "c", 1, "message count")
+	flag.DurationVar(&delayDuration, "d", time.Second*2, "delay duration")
 	flag.Parse()
 
 	url := `http://localhost:8000/dk/v1/messages`
@@ -52,7 +56,7 @@ func main() {
 		fmt.Println(string(bytes))
 	}
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < count; i++ {
 		sentFunc()
 	}
 }

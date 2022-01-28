@@ -26,7 +26,11 @@ redis 重启后 master 负责同步 mysql 里的数据到 redis
 
 多实例 HA/主备模式,  node 抢占 master
 
-7. Prometheus 监控
+✅ 7. Prometheus 监控
+
+```shell
+sum(delayedqueue_delayed_messages_total)
+```
 
 ### 本机测试步骤 
 
@@ -49,7 +53,7 @@ go run example/consumer/main.go
 ```
 5. 启动测试 producer
 ```shell
-go run example/producer/main.go -delay 10s
+go run example/producer/main.go -c 2 -d 10s
 ```
 
 ### Docker 运行步骤
@@ -77,7 +81,7 @@ curl --location --request POST 'localhost:8000/dk/v1/messages' \
 }'
 ```
 
-4. redis data with `delaykafka` DELAY_KAFKA_KEYWORD
+4. redis data with env: `DELAY_KAFKA_KEYWORD=delaykafka` 
 ```shell
 127.0.0.1:6379> keys *
 1) "delaykafka/zset/01"

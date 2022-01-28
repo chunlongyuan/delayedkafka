@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -26,18 +25,19 @@ func QueueCommand() *cli.Command {
 
 			setDefaults()
 
-			health.RunOnPort()
-			pprof.RunOnPort()
-			metric.RunOnPort()
-
 			h := ha.NewHA()
-			err := errors.New("must master")
-			for err != nil {
-				err = h.MushMaster(ctx.Context)
-				logrus.WithError(err).Warnln("waiting to become master")
+			for {
+				if err := h.MushMaster(ctx.Context); err == nil {
+					break
+				}
+				logrus.Warnln("waiting to become master")
 				<-time.After(time.Second * 3)
 			}
 			logrus.Warnln("master node")
+
+			health.RunOnPort()
+			pprof.RunOnPort()
+			metric.RunOnPort()
 
 			c, cancel := context.WithCancel(ctx.Context)
 			defer cancel()

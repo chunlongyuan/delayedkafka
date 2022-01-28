@@ -30,15 +30,16 @@ type Store interface {
 var ErrNoData = errors.New(`message not found`)
 
 type store struct {
-	key      string //
-	db       *gorm.DB
-	rPool    *redigo.Pool
-	perCount int
+	key            string //
+	db             *gorm.DB
+	rPool          *redigo.Pool
+	perCount       int
+	metricInterval time.Duration
 }
 
 func NewStore(opts ...Option) Store {
 
-	opt := Options{Key: `default`, DB: initial.DefDB, Pool: initial.DefRedisPool, PerCount: 10}
+	opt := Options{Key: `default`, DB: initial.DefDB, Pool: initial.DefRedisPool, PerCount: 10, MetricInterval: time.Second * 10}
 
 	for _, o := range opts {
 		o(&opt)
@@ -48,7 +49,15 @@ func NewStore(opts ...Option) Store {
 		panic(fmt.Sprintf(`illegal perCount: %v`, opt.PerCount))
 	}
 
-	return &store{key: opt.Key, db: opt.DB, rPool: opt.Pool, perCount: opt.PerCount}
+	if opt.MetricInterval < time.Second*3 {
+		panic(fmt.Sprintf("inverval cannot less than %v", time.Second*3))
+	}
+
+	s := store{key: opt.Key, db: opt.DB, rPool: opt.Pool, perCount: opt.PerCount, metricInterval: opt.MetricInterval}
+
+	go s.statLoop()
+
+	return &s
 }
 
 func (p *store) Add(ctx context.Context, topic string, id uint64, msg Message) error {
@@ -260,4 +269,32 @@ func (p *store) getHashStoreKey() string {
 
 func (p *store) getZSetStoreKey() string {
 	return fmt.Sprintf(`%s/zset/%s`, config.Cfg.QueueKeyword, p.key)
+}
+
+// metric
+func (p *store) statLoop() {
+
+	ticker := time.NewTicker(p.metricInterval)
+	defer ticker.Stop()
+
+	metricFunc := func() {
+
+		conn := p.rPool.Get()
+		defer conn.Close()
+
+		count, err := redigo.Int(conn.Do("ZCARD", p.getZSetStoreKey()))
+		if err != nil {
+			logrus.WithError(err).Errorln("zcard err")
+			return
+		}
+
+		metricMessageTotal(p.key, count)
+
+		logrus.WithField("key", p.key).WithField("total", count).Infoln("store metric")
+	}
+
+	for range ticker.C {
+		metricFunc()
+	}
+
 }
