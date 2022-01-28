@@ -126,7 +126,7 @@ func (p *store) Delete(ctx context.Context, topic string, id uint64) error {
 	defer conn.Close()
 
 	// 删除 db
-	if err := tx.Exec("update "+TableMessage+" set status=? where id=?", StatusDelete, id).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := tx.Exec("update "+TableMessage+" set state=? where id=?", StatusDelete, id).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		logger.WithError(err).Errorln("delete db err")
 		return err
 	}
@@ -214,8 +214,8 @@ redis.call('ZREM', KEYS[2], ARGV[2])
 		}
 		logger.Infof("redis ok by script: %v", script)
 
-		// update db status
-		if err := tx.Exec(`update `+TableMessage+` set status=? where id=?`, StatusSpent, msg.ID).Error; err != nil {
+		// update db state
+		if err := tx.Exec(`update `+TableMessage+` set state=? where id=?`, StatusSpent, msg.ID).Error; err != nil {
 			logger.WithError(err).Errorln(" update db err")
 		}
 

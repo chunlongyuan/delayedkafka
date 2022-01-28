@@ -122,9 +122,9 @@ func TestBucketStore_FetchDelayMessage(t *testing.T) {
 		<-time.After(time.Millisecond * 100)
 
 		var msg Message
-		So(db.Where("status=?", StatusDelay).First(&msg).Error, ShouldEqual, gorm.ErrRecordNotFound)
+		So(db.Where("state=?", StatusDelay).First(&msg).Error, ShouldEqual, gorm.ErrRecordNotFound)
 
 		msg = Message{}
-		So(db.Where("status=?", StatusSpent).First(&msg).Error, ShouldBeNil)
+		So(db.Where("state=?", StatusSpent).First(&msg).Error, ShouldBeNil)
 	})
 }

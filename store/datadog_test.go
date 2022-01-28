@@ -87,7 +87,7 @@ func TestSyncer_doSync(t *testing.T) {
 					Topic:       topic,
 					DelayMs:     delayMs,
 					TTRms:       ttrMs,
-					Status:      int8(i), // status=0 的会被同步到 redis
+					State:       int8(i), // state=0 的会被同步到 redis
 					Body:        body,
 					CreatedAtMs: createAtMs,
 					CreatedAt:   time.Now(),

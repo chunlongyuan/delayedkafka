@@ -106,10 +106,10 @@ func Test_store_AddAndDelete(t *testing.T) {
 			So(zLen, ShouldEqual, 0)
 
 			msg = Message{}
-			So(db.Where(`id=? and status=1`, id).First(&msg).Error, ShouldBeNil)
+			So(db.Where(`id=? and state=1`, id).First(&msg).Error, ShouldBeNil)
 
 			msg = Message{}
-			So(db.Where(`id=? and status=0`, id).First(&msg).Error, ShouldEqual, gorm.ErrRecordNotFound)
+			So(db.Where(`id=? and state=0`, id).First(&msg).Error, ShouldEqual, gorm.ErrRecordNotFound)
 		})
 	})
 }
@@ -164,10 +164,10 @@ func Test_store_FetchDelayMessage(t *testing.T) {
 		wg.Wait()
 
 		var msg Message
-		So(db.Where("status=?", StatusDelay).First(&msg).Error, ShouldEqual, gorm.ErrRecordNotFound)
+		So(db.Where("state=?", StatusDelay).First(&msg).Error, ShouldEqual, gorm.ErrRecordNotFound)
 
 		msg = Message{}
-		So(db.Where("status=?", StatusSpent).First(&msg).Error, ShouldBeNil)
+		So(db.Where("state=?", StatusSpent).First(&msg).Error, ShouldBeNil)
 
 	})
 }

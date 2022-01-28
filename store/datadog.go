@@ -143,7 +143,7 @@ func (p *datadog) doSync(ctx context.Context) error {
 
 		sqlStr := fmt.Sprintf(`
 select * from %v
-where id>%v and status=%v
+where id>%v and state=%v
 order by id asc
 limit 100
 `, TableMessage, lastId, StatusDelay)
