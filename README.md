@@ -62,7 +62,7 @@ make docker
 2. 运行镜像
 ```shell
 # 注意替换本机 IP
-docker run --rm -it -e ENV=dev -e DB_HOSTNAME=192.168.15.185 -e KAFKA_SERVER=192.168.15.185:9092 -e REDIS_CACHE_HOST=192.168.15.185 dk ./dk start
+docker run --rm -it -e ENV=dev -e DB_HOSTNAME=192.168.15.185 -e KAFKA_SERVER=192.168.15.185:9092 -e REDIS_CACHE_HOST=192.168.15.185 delaykafka ./dk start
 ```
 
 3. curl test

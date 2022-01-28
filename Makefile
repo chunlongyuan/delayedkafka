@@ -8,7 +8,7 @@ test:
 
 .PHONY: docker
 docker:
-	docker build . -t dk:latest
+	docker build . -t delaykafka:latest
 
 docker_compose_files=-f ./docker-compose/docker-compose.yml
 
