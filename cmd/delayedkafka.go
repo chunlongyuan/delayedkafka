@@ -25,7 +25,11 @@ func QueueCommand() *cli.Command {
 
 			setDefaults()
 
+			health.RunOnPort()
+			pprof.RunOnPort()
+
 			h := ha.NewHA()
+
 			for {
 				if err := h.MushMaster(ctx.Context); err == nil {
 					break
@@ -35,8 +39,6 @@ func QueueCommand() *cli.Command {
 			}
 			logrus.Warnln("master node")
 
-			health.RunOnPort()
-			pprof.RunOnPort()
 			metric.RunOnPort()
 
 			c, cancel := context.WithCancel(ctx.Context)
