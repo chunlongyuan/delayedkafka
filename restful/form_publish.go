@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
 	"dk/messenger"
 )
@@ -30,6 +31,7 @@ func PublishWithProducer(p messenger.Producer) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"msg": fmt.Sprintf("err: %v", err.Error())})
 			return
 		}
+		logrus.Infof("publish message:%+v", form)
 
 		msg, err := createMessage(form)
 		if err != nil {
