@@ -62,7 +62,7 @@ func (p *producer) Publish(ctx context.Context, topic string, msg Message) (uint
 		return id, p.delivery.DeliverImmediately(topic, id, message)
 	}
 
-	if store.SyncState != 0 {
+	if store.IsSyncing() {
 		return 0, errors.New("can not write when sync data")
 	}
 

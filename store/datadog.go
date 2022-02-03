@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/garyburd/redigo/redis"
@@ -16,14 +15,13 @@ import (
 )
 
 const (
-	monitordkValue = 1
+	monitorDKValue = 1
 )
 
 var (
 	halfMonitorTime time.Time
 	// SyncState 同步状态
-	syncMu    sync.Mutex
-	SyncState int
+	syncState int
 	//
 	monitorDKKey string
 )
@@ -114,7 +112,7 @@ func (p *datadog) resetMonitor(conn redis.Conn) {
 	logger := logrus.WithField("function", "resetMonitor")
 	logger.Debugln("reset")
 
-	_, err := conn.Do("SETEX", monitorDKKey, p.monitorDKSeconds, monitordkValue)
+	_, err := conn.Do("SETEX", monitorDKKey, p.monitorDKSeconds, monitorDKValue)
 	if err != nil {
 		logger.WithError(err).Errorln("setex err")
 		return
@@ -129,13 +127,11 @@ func (p *datadog) doSync(ctx context.Context) error {
 		logrus.Warnf("do sync data count: %v", total)
 	}()
 
-	syncMu.Lock()
-	SyncState = 1
-
-	defer func() {
-		SyncState = 0
-		syncMu.Unlock()
-	}()
+	if IsSyncing() {
+		return nil
+	}
+	startSync()
+	defer syncFinished()
 
 	var (
 		lastId  uint64
@@ -149,6 +145,7 @@ where id>%v and state=%v
 order by id asc
 limit 100
 `, TableMessage, lastId, StatusDelay)
+
 		var messages []Message
 		if err := p.db.Raw(sqlStr).Scan(&messages).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -175,4 +172,16 @@ limit 100
 	}
 	logrus.Errorf("exceed max loop %v", maxLoop)
 	return nil
+}
+
+func syncFinished() {
+	syncState = 0
+}
+
+func startSync() {
+	syncState = 1
+}
+
+func IsSyncing() bool {
+	return syncState == 1
 }
