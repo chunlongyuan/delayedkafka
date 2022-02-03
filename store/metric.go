@@ -12,7 +12,7 @@ var (
 
 func init() {
 	delayedMessagesTotal = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Name: fmt.Sprintf("%s_delayed_messages_total", "delayedqueue"),
+		Name: fmt.Sprintf("%s_delayed_messages_total", "delayedkafka"),
 		Help: "Delayed message count.",
 	}, []string{"bucket"})
 	prometheus.MustRegister(delayedMessagesTotal)

@@ -4,7 +4,7 @@ A kafka and mysql backed queue for scheduling delayed events
 
 ✅ 1. 消息支持延迟
 
-消息 id 存于 zset 中, 采用 createTime+delay 作为 score, 轮询到期的固定条数消息进行 delivery
+消息 id 存于 zset 中, 采用 created_at_ms+delay_ms 作为 score, 轮询到期的固定条数消息进行 delivery
 
 ✅ 2. 可靠性
 
@@ -24,12 +24,13 @@ redis 重启后 master 负责同步 mysql 里的数据到 redis
 
 ✅ 6. 高可用
 
-多实例 HA/主备模式,  node 抢占 master
+多实例 HA/主备模式,  node 抢占成为 master
 
 ✅ 7. Prometheus 监控
 
 ```shell
-sum(delayedqueue_delayed_messages_total)
+# 队列中等待的消息数
+sum(delayedkafka_delayed_messages_total)
 ```
 
 ### 本机测试步骤 
