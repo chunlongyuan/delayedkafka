@@ -2,8 +2,6 @@ package messenger
 
 import (
 	"context"
-	"encoding/json"
-	"strconv"
 	"time"
 
 	"github.com/Shopify/sarama"
@@ -68,25 +66,11 @@ func (p *kafkaDelivery) DoWork(ctx context.Context) error {
 
 func (p *kafkaDelivery) DeliverImmediately(topic string, id uint64, msg store.Message) error {
 
-	postmanMessage := KafkaMessage{
-		Id:          strconv.FormatUint(id, 10),
-		DelaySecond: msg.DelayMs / 1e3,
-		Body:        msg.Body,
-		CreatedAtMs: msg.CreatedAtMs,
-		IssuedAt:    time.Now(),
-	}
+	logger := logrus.WithField("postman_message", msg)
 
-	logger := logrus.WithField("postman_message", postmanMessage)
-
-	body, err := json.Marshal(&postmanMessage)
-	if err != nil {
-		logger.Errorln("marshal err")
-		return err
-	}
-
-	_, _, err = p.producer.SendMessage(&sarama.ProducerMessage{
+	_, _, err := p.producer.SendMessage(&sarama.ProducerMessage{
 		Topic: topic,
-		Value: sarama.ByteEncoder(body),
+		Value: sarama.ByteEncoder(msg.Body),
 	})
 	if err != nil {
 		logger.WithError(err).Errorln("send message err")
